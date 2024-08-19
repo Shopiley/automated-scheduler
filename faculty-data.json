@@ -1,0 +1,68 @@
+[
+    {
+        "id": "teacher1",
+        "name": "Dr. Alice Smith",
+        "department": "Computer Science",
+        "courseID": "CS101"
+    },
+    {
+        "id": "teacher2",
+        "name": "Prof. John Doe",
+        "department": "Mathematics",
+        "courseID": "MATH101"
+    },
+    {
+        "id": "teacher3",
+        "name": "Dr. Emily Johnson",
+        "department": "Economics",
+        "courseID": "ECON201"
+    },
+    {
+        "id": "teacher4",
+        "name": "Prof. Michael Brown",
+        "department": "Statistics",
+        "courseID": "STAT202"
+    },
+    {
+        "id": "teacher5",
+        "name": "Dr. Sarah Davis",
+        "department": "Literature",
+        "courseID": "ENG102"
+    },
+    {
+        "id": "teacher6",
+        "name": "Prof. William Wilson",
+        "department": "Philosophy",
+        "courseID": "PHIL301"
+    },
+    {
+        "id": "teacher7",
+        "name": "Dr. Linda Martinez",
+        "department": "Mathematics",
+        "courseID": "MATH301"
+    },
+    {
+        "id": "teacher8",
+        "name": "Prof. Robert Anderson",
+        "department": "Physics",
+        "courseID": "PHY210"
+    },
+    {
+        "id": "teacher9",
+        "name": "Dr. Patricia Taylor",
+        "department": "Biology",
+        "courseID": "BIO201"
+    },
+    {
+        "id": "teacher10",
+        "name": "Prof. Christopher Thomas",
+        "department": "Chemistry",
+        "courseID": "CHEM202"
+    },
+    {
+        "id": "teacher11",
+        "name": "Dr. Barbara Moore",
+        "department": "Physics",
+        "courseID": "PHY210"
+    }
+]
