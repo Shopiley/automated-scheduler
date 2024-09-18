@@ -8,8 +8,8 @@ class Class:
         self.faculty_id = faculty_id
         self.course_id = course_id
 
-    # def __repr__(self):
-    #     return f"Class(student_group_id={self.student_group}, faculty_id={self.faculty_id}, course_code={self.course_id})"
+    def __repr__(self):
+        return f"Class(student_group_id={self.student_group}, faculty_id={self.faculty_id}, course_code={self.course_id})"
        
 
 """

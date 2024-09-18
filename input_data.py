@@ -5,7 +5,7 @@ from entitities.room import Room
 from entitities.student_group import StudentGroup
 from entitities.Class import Class
 import json
-
+from enums import Size, RoomType
 from entitities.time_slot import TimeSlot
 
 
@@ -23,8 +23,8 @@ class inputData():
         self.hours = 3
         self.days = 5
 
-    def addCourse(self, name: str, code: str, credits: int, student_groupsID: List[str], facultyId):
-        self.courses.append(Course(name, code, credits, student_groupsID, facultyId))
+    def addCourse(self, name: str, code: str, credits: int, student_groupsID: List[str], facultyId, required_room_type: str ):
+        self.courses.append(Course(name, code, credits, student_groupsID, facultyId, required_room_type))
         # print(Course(name, code, credits, student_groupsID).name)
 
     def addRoom(self, Id: str, name:str, capacity:int, room_type:str):
@@ -104,7 +104,7 @@ input_data = inputData()
 with open('course-data.json') as file:
     course_data = json.load(file)
     for course in course_data:
-        input_data.addCourse(course['name'], course['code'], course['credits'], course['student_groupsID'], course['facultyId'])
+        input_data.addCourse(course['name'], course['code'], course['credits'], course['student_groupsID'], course['facultyId'], course['required_room_type'])
 
 # Read room data from JSON file
 with open('rooms-data.json') as file:

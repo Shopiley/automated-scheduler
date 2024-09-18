@@ -1,7 +1,6 @@
 from input_data import input_data
 from timetable import Timetable
 
-
 class Utility:
 
     @staticmethod
@@ -31,7 +30,7 @@ class Utility:
 
         print("----Slots----")
         for i in range(days * hours * nostgrp):
-            slot = Timetable.slot[i]
+            slot = Timetable.periods_list[i]
             if slot is not None:
                 print(f"{i}- {slot.student_group.name} {slot.course_id} {slot.faculty_id}")
             # else:
