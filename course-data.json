@@ -77,7 +77,7 @@
         "credits": 3, 
         "student_groupsID": ["group5"],
         "facultyId": "teacher10",
-        "required_room_type": "regular"
+        "required_room_type": "lab"
       }
 ]
 

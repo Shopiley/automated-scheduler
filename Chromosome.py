@@ -75,20 +75,21 @@ class Chromosome:
 
                     # Check for faculty clash
                     if faculty_id in teacher_schedule:
-                        self.point += 10
+                        self.point += 1
                     else:
                         teacher_schedule[faculty_id] = assigned_room  # Assign the faculty to the room
                 
                     # Check for room clash
                     if assigned_room in roomlist:
-                        self.point += 10  # Room clash, bad solution
+                        self.point += 1  # Room clash, bad solution
                     else:
                         roomlist.append(assigned_room)
 
                     # check for student group size and room capacity
                     # print(slot.student_group.categorize_group_size(), assigned_room.categorize_group_size())
-                    if slot.student_group.categorize_group_size() != assigned_room.categorize_group_size():
-                        self.point += 6
+                    # if slot.student_group.categorize_group_size() != assigned_room.categorize_group_size():
+                    if slot.student_group.no_students <= assigned_room.capacity:
+                        self.point += 1
 
                     # check for room type match
                     for course in self.courses:
@@ -97,7 +98,7 @@ class Chromosome:
 
                     # print(required_room_type, assigned_room.room_type)
                     if required_room_type == assigned_room.room_type:
-                        self.point += 6
+                        self.point += 1
 
         # Hard constraint 2: No two events can happen in the same room* and timeslot
         """
@@ -106,7 +107,7 @@ class Chromosome:
 
         # Hard constraint 3: 
         
-        self.fitness = 10 - (self.point / ((self.nostgrp - 1.0) * self.hours * self.days))
+        self.fitness = 1 - (self.point / ((self.nostgrp - 1.0) * self.hours * self.days))
         self.point = 0
         return self.fitness
 
@@ -152,5 +153,5 @@ class Chromosome:
 
 test_chromosome = Chromosome()
 # print(test_chromosome.print_time_table())
-print(test_chromosome.print_chromosome())
+# print(test_chromosome.print_chromosome())
 # print(test_chromosome.solution_repr())

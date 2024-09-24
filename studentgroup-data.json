@@ -2,6 +2,7 @@
     {
         "id": "group1",
         "name": "Freshman Computer Science",
+        "no_students": 62,
         "courseIDs": ["CS101", "MATH101", "BIO201"],
         "teacherIDS": ["teacher1", "teacher2", "teacher9"],
         "hours_required": [3, 3, 3]
@@ -9,6 +10,7 @@
     {
         "id": "group2",
         "name": "Sophomore Economics",
+        "no_students": 19,
         "courseIDs": ["ECON201", "STAT202", "BIO201"],
         "teacherIDS": ["teacher3", "teacher4", "teacher9"],
         "hours_required": [3, 4, 2]
@@ -16,6 +18,7 @@
     {
         "id": "group3",
         "name": "Junior Literature",
+        "no_students": 22,
         "courseIDs": ["ENG102", "PHIL301"],
         "teacherIDS": ["teacher5", "teacher6"],
         "hours_required": [2, 3]
@@ -23,6 +26,7 @@
     {
         "id": "group4",
         "name": "Senior Mathematics",
+        "no_students": 12,
         "courseIDs": ["MATH301", "PHY210", "BIO201", "CHEM202"],
         "teacherIDS": ["teacher7", "teacher8", "teacher9", "teacher10"],
         "hours_required": [4, 3, 3, 3]
@@ -30,6 +34,7 @@
     {
         "id": "group5",
         "name": "Mixed Sciences",
+        "no_students": 55,
         "courseIDs": ["BIO201", "CHEM202", "PHY210"],
         "teacherIDS": ["teacher9", "teacher10", "teacher11"],
         "hours_required": [3, 3, 3]
