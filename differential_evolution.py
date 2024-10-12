@@ -1,7 +1,6 @@
 import random
 from typing import List
 import copy
-from Gene import Gene
 from utils import Utility
 from entitities.Class import Class
 from input_data import input_data
@@ -321,9 +320,10 @@ class DifferentialEvolution:
             population_diversity = self.calculate_population_diversity()
             diversity_history.append(population_diversity)
 
-            # print(f"Best solution for generation {generation+1}/{max_generations} has a fitness of: {best_fitness}, Diversity: {population_diversity}")
+            print(f"Best solution for generation {generation+1}/{max_generations} has a fitness of: {best_fitness}")
 
             if self.evaluate_fitness(best_solution) == self.desired_fitness:
+                print(f"Solution with desired fitness of {self.desired_fitness} found at Generation {generation}! 🎉")
                 break  # Stop if the best solution has no constraint violations
 
         # print and return best individual for last generation
@@ -331,9 +331,10 @@ class DifferentialEvolution:
         # self.print_all_timetables(best_solution, input_data.days, input_data.hours)
         return best_solution, fitness_history, generation, diversity_history
 
+
     def print_timetable(self, individual, student_group, days, hours_per_day, day_start_time=9):
         # Create a blank timetable grid for the student group
-        timetable = [['' for _ in range(days)] for _ in range(hours_per_day)]
+        timetable = [['Free' for _ in range(days)] for _ in range(hours_per_day)]
 
         # Loop through the individual's chromosome to populate the timetable
         for room_idx, room_slots in enumerate(individual):
@@ -344,7 +345,9 @@ class DifferentialEvolution:
                     day = timeslot_idx // hours_per_day
                     hour = timeslot_idx % hours_per_day
                     if day < days:
-                        timetable[hour][day] = f"Course: {class_event.course_id}, Lecturer: {class_event.faculty_id}, Room: {room_idx}"
+                        course = input_data.getCourse(class_event.course_id)
+                        faculty = input_data.getFaculty(class_event.faculty_id)
+                        timetable[hour][day] = f"Course: {course.code}, Lecturer: {faculty.name}, Room: {room_idx}"
         
         # Print the timetable for the student group
         print(f"Timetable for Student Group: {student_group.name}")
@@ -356,16 +359,125 @@ class DifferentialEvolution:
             row = [timetable[hour][day] if timetable[hour][day] else "Free" for day in range(days)]
             print(f"{time_label:<15} | " + " | ".join(row))
         print("\n")
+        return timetable
 
     def print_all_timetables(self, individual, days, hours_per_day, day_start_time=9):
+        # app.layout = html.Div([
+        #     html.H1("Timetable"),
+        #     html.Div([
+        #         html.Label("Select Student Group:"),
+        #         dcc.Dropdown(
+        #             id='student-group-dropdown',
+        #             options=[{'label': student_group.name, 'value': student_group.id} for student_group in input_data.student_groups],
+        #             value=input_data.student_groups[0].id
+        #         ),
+        #     ]),
+        #     html.Div(id='timetable-container')
+        # ])
+        data = []
         # Find all unique student groups in the individual
         student_groups = input_data.student_groups
         
         # Print timetable for each student group
         for student_group in student_groups:
-            self.print_timetable(individual, student_group, days, hours_per_day, day_start_time)
+            timetable = self.print_timetable(individual, student_group, days, hours_per_day, day_start_time)
+            rows = []
+            for hour in range(hours_per_day):
+                time_label = f"{day_start_time + hour}:00"
+                row = [time_label] + [timetable[hour][day] for day in range(days)]
+                rows.append(row)
+            data.append({"student_group": student_group, "timetable": rows})
+        return data
 
-# import time
+de = DifferentialEvolution(input_data, 50, 0.4, 0.9)
+
+best_solution, fitness_history, generation, diversity_history = de.run(200)
+print(best_solution)
+
+
+import dash
+import dash_table
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+import pandas as pd
+
+app = dash.Dash(__name__)
+
+# Layout for the Dash app
+app.layout = html.Div([
+    html.H1("DE Timetable Output"),
+    html.Div(id='tables-container')
+])
+
+# Callback to generate tables dynamically
+@app.callback(
+    Output('tables-container', 'children'),
+    [Input('tables-container', 'n_clicks')]
+)
+def render_tables(n_clicks):
+    all_timetables = de.print_all_timetables(best_solution, input_data.days, input_data.hours, 9)
+    # print(all_timetables)
+    tables = []
+    
+    for timetable_data in all_timetables:
+        table = dash_table.DataTable(
+            columns=[{"name": "Time", "id": "Time"}] + [{"name": f"Day {d+1}", "id": f"Day {d+1}"} for d in range(input_data.days)],
+            data=[dict(zip(["Time"] + [f"Day {d+1}" for d in range(input_data.days)], row)) for row in timetable_data["timetable"]],
+            style_cell={
+                'textAlign': 'center',
+                'height': 'auto',
+                'whiteSpace': 'normal',
+            },
+            style_data_conditional=[
+                {
+                    'if': {'column_id': 'Day 1'},
+                    'backgroundColor': 'lightblue',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 2'},
+                    'backgroundColor': 'lightgreen',
+                    'color': 'black',
+                },
+                  {
+                    'if': {'column_id': 'Day 3'},
+                    'backgroundColor': 'lavender',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 4'},
+                    'backgroundColor': 'lightcyan',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 5'},
+                    'backgroundColor': 'lightyellow',
+                    'color': 'black',
+                },
+                # Add more styles for other days as needed
+            ],
+            tooltip_data=[
+                {
+                    f"Day {d+1}": {'value': 'Room info goes here', 'type': 'markdown'} for d in range(input_data.days)
+                } for row in timetable_data["timetable"]
+            ],
+            tooltip_duration=None
+        )
+
+        tables.append(html.Div([
+            html.H3(f"Timetable for {timetable_data['student_group'].name}"), 
+            table
+        ]))
+    
+    return tables
+
+# Run the Dash app
+if __name__ == '__main__':
+    app.run_server(debug=True)
+
+
+    # import time
 # pop_size = 50
 # F = 0.5
 # max_generations = 500

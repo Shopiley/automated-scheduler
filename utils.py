@@ -38,3 +38,37 @@ class Utility:
             
             if (i + 1) % (hours * days) == 0:
                 print("******************************")
+
+def print_timetable(individual, student_group, events_map, days, hours_per_day, day_start_time=9):
+    # Create a blank timetable grid for the student group
+    timetable = [['' for _ in range(days)] for _ in range(hours_per_day)]
+
+    # Loop through the individual's chromosome to populate the timetable
+    for room_idx, room_slots in enumerate(individual):
+        for timeslot_idx, event in enumerate(room_slots):
+            class_event = events_map.get(event)
+            if class_event is not None and class_event.student_group.id == student_group.id:
+                
+                day = timeslot_idx // hours_per_day
+                hour = timeslot_idx % hours_per_day
+                if day < days:
+                    timetable[hour][day] = f"Course: {class_event.course_id}, Lecturer: {class_event.faculty_id}, Room: {room_idx}"
+    
+    # Print the timetable for the student group
+    print(f"Timetable for Student Group: {student_group.name}")
+    print(" " * 15 + " | ".join([f"Day {d+1}" for d in range(days)]))
+    print("-" * (20 + days * 15))
+    
+    for hour in range(hours_per_day):
+        time_label = f"{day_start_time + hour}:00"
+        row = [timetable[hour][day] if timetable[hour][day] else "Free" for day in range(days)]
+        print(f"{time_label:<15} | " + " | ".join(row))
+    print("\n")
+
+def print_all_timetables(individual, events_map, days, hours_per_day, day_start_time=9):
+    # Find all unique student groups in the individual
+    student_groups = input_data.student_groups
+    
+    # Print timetable for each student group
+    for student_group in student_groups:
+        print_timetable(individual, student_group, events_map, days, hours_per_day, day_start_time)

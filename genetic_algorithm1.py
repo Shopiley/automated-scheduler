@@ -2,14 +2,22 @@ import random
 from typing import List
 import copy
 from Gene import Gene
-from utils import Utility
+# from utils import Utility
+import utils
 from entitities.Class import Class
 from input_data import input_data
 import numpy as np
 
+import dash
+import dash_table
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+import pandas as pd
+
 # population initialization using input_data
 class GeneticAlgorithm:
-    def __init__(self, input_data, pop_size: int, mutation_rate: float):
+    def __init__(self, input_data, pop_size: int, mutation_rate: float, crossover_rate: float):
         self.desired_fitness = 0
         self.rooms = input_data.rooms
         self.timeslots = input_data.create_time_slots(no_hours_per_day=input_data.hours, no_days_per_week=input_data.days, day_start_time=9)
@@ -18,6 +26,7 @@ class GeneticAlgorithm:
         self.events_list, self.events_map = self.create_events()
         self.pop_size = pop_size
         self.mutation_rate = mutation_rate
+        self.crossover_rate = crossover_rate
         self.population = self.initialize_population()  # List to hold all chromosomes
 
     def create_events(self):
@@ -399,11 +408,15 @@ class GeneticAlgorithm:
         for _ in range(self.pop_size // 2):  # Assuming crossover generates 2 offspring per pair
             parent1 = parent_population[random.randint(0, self.pop_size - 1)]
             parent2 = parent_population[random.randint(0, self.pop_size - 1)]
-            # print(f"parent1: {parent1}, parent2:{parent2}")
 
-            # Perform crossover
-            child1 = self.multi_point_crossover(parent1, parent2, points=2)
-            child2 = self.multi_point_crossover(parent2, parent1, points=2)
+                # Perform crossover based on crossover rate
+            if random.random() < self.crossover_rate:
+                child1 = self.multi_point_crossover(parent1, parent2, points=2)
+                child2 = self.multi_point_crossover(parent2, parent1, points=2)
+            else:
+                # If crossover doesn't happen, offspring are copies of the parents
+                child1 = parent1.copy()
+                child2 = parent2.copy()
 
             offspring_population.append(child1)
             offspring_population.append(child2)
@@ -464,22 +477,130 @@ class GeneticAlgorithm:
                 # print(best_solution, self.count_non_none(best_solution))
                 break
 
+        utils.print_all_timetables(best_solution, self.events_map, input_data.days, input_data.hours)
         return best_solution, fitness_history, generation, diversity_history
 
         # self.print_all_timetables(best_solution, input_data.days, input_data.hours)
 
-# import time
+    def print_timetable(self, individual, student_group, days, hours_per_day, day_start_time=9):
+        # Create a blank timetable grid for the student group
+        timetable = [['Free' for _ in range(days)] for _ in range(hours_per_day)]
 
-pop_size = 53
-# F = 0.8
-max_generations = 50
-# CR = 0.9
+        # Loop through the individual's chromosome to populate the timetable
+        for room_idx, room_slots in enumerate(individual):
+            for timeslot_idx, event in enumerate(room_slots):
+                class_event = self.events_map.get(event)
+                if class_event is not None and class_event.student_group.id == student_group.id:
+                    
+                    day = timeslot_idx // hours_per_day
+                    hour = timeslot_idx % hours_per_day
+                    if day < days:
+                        timetable[hour][day] = f"Course: {class_event.course_id}, Lecturer: {class_event.faculty_id}, Room: {room_idx}"
+        
+        # Print the timetable for the student group
+        print(f"Timetable for Student Group: {student_group.name}")
+        print(" " * 15 + " | ".join([f"Day {d+1}" for d in range(days)]))
+        print("-" * (20 + days * 15))
+        
+        for hour in range(hours_per_day):
+            time_label = f"{day_start_time + hour}:00"
+            row = [timetable[hour][day] if timetable[hour][day] else "Free" for day in range(days)]
+            print(f"{time_label:<15} | " + " | ".join(row))
+        print("\n")
+        return timetable
 
-ga = GeneticAlgorithm(input_data, pop_size=53, mutation_rate=0.5)
+    def print_all_timetables(self, individual, days, hours_per_day, day_start_time=9):
+        data = []
+        # Find all unique student groups in the individual
+        student_groups = input_data.student_groups
+        
+        # Print timetable for each student group
+        for student_group in student_groups:
+            timetable = self.print_timetable(individual, student_group, days, hours_per_day, day_start_time)
+            rows = []
+            for hour in range(hours_per_day):
+                time_label = f"{day_start_time + hour}:00"
+                row = [time_label] + [timetable[hour][day] for day in range(days)]
+                rows.append(row)
+            data.append({"student_group": student_group, "timetable": rows})
+        return data
+
+ga = GeneticAlgorithm(input_data, pop_size=50, mutation_rate=0.6, crossover_rate=0.7)
+
+best_solution, fitness_history, generation, diversity_history = ga.run(200)
+
+app = dash.Dash(__name__)
+    
 
 
-# start_time = time.time()
-ga.run(max_generations)
-# ga_time = time.time() - start_time
+# Layout for the Dash app
+app.layout = html.Div([
+    html.H1("GA Timetable Output"),
+    html.Div(id='tables-container')
+])
 
-# print(f'Time: {ga_time:.2f}s')
+# Callback to generate tables dynamically
+@app.callback(
+    Output('tables-container', 'children'),
+    [Input('tables-container', 'n_clicks')]
+)
+def render_tables(n_clicks):
+    all_timetables = ga.print_all_timetables(best_solution, input_data.days, input_data.hours, 9)
+    # print(all_timetables)
+    tables = []
+    
+    for timetable_data in all_timetables:
+        table = dash_table.DataTable(
+            columns=[{"name": "Time", "id": "Time"}] + [{"name": f"Day {d+1}", "id": f"Day {d+1}"} for d in range(input_data.days)],
+            data=[dict(zip(["Time"] + [f"Day {d+1}" for d in range(input_data.days)], row)) for row in timetable_data["timetable"]],
+            style_cell={
+                'textAlign': 'center',
+                'height': 'auto',
+                'whiteSpace': 'normal',
+            },
+            style_data_conditional=[
+                {
+                    'if': {'column_id': 'Day 1'},
+                    'backgroundColor': 'lightblue',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 2'},
+                    'backgroundColor': 'lightgreen',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 3'},
+                    'backgroundColor': 'lavender',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 4'},
+                    'backgroundColor': 'lightcyan',
+                    'color': 'black',
+                },
+                {
+                    'if': {'column_id': 'Day 5'},
+                    'backgroundColor': 'lightyellow',
+                    'color': 'black',
+                },
+                # Add more styles for other days as needed
+            ],
+            tooltip_data=[
+                {
+                    f"Day {d+1}": {'value': 'Room info goes here', 'type': 'markdown'} for d in range(input_data.days)
+                } for row in timetable_data["timetable"]
+            ],
+            tooltip_duration=None
+        )
+
+        tables.append(html.Div([
+            html.H3(f"Timetable for {timetable_data['student_group'].name}"), 
+            table
+        ]))
+    
+    return tables
+
+# Run the Dash app
+if __name__ == '__main__':
+    app.run_server(debug=True)

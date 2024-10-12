@@ -17,10 +17,8 @@ class inputData():
         self.faculties = []
         self.constraints = []
         self.classes = []
-        self.cross_over_rate = 1.0
-        self.mutation_rate = 0.1
         self.nostudentgroup = len(self.student_groups)
-        self.hours = 3
+        self.hours = 8
         self.days = 5
 
     def addCourse(self, name: str, code: str, credits: int, student_groupsID: List[str], facultyId, required_room_type: str ):
