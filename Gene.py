@@ -27,18 +27,25 @@ class Gene:
     def __init__(self, i):
         self.days = input_data.days
         self.hours = input_data.hours
+        self.rooms = input_data.rooms
+
         self.slotno = [None] * (self.days * self.hours)
+        self.room_assignment = [None] * (self.days * self.hours)
         
         flag = [False] * (self.days * self.hours)
         
         for j in range(self.days * self.hours):
+            # Assign a random timeslot
             rnd = random.randint(0, self.days * self.hours - 1)
             while flag[rnd]:
                 rnd = random.randint(0, self.days * self.hours - 1)
             flag[rnd] = True
             self.slotno[j] = i * self.days * self.hours + rnd
 
-            # If you want to print the subject or "break", you would need a similar logic in Python
+            # Randomly assign a room from the available rooms
+            self.room_assignment[j] = random.choice(self.rooms)
+
+            # If you want to print the subject or "break"
             # slot = TimeTable.returnSlots()
             # if slot[self.slotno[j]] is not None:
             #     print(slot[self.slotno[j]].subject, end=" ")
@@ -49,5 +56,6 @@ class Gene:
     def deep_clone(self):
         return copy.deepcopy(self)
 
-# gene = Gene(0)
+gene = Gene(2)
 # print(gene.slotno)
+# print(gene.room_assignment)

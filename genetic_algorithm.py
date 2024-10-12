@@ -62,6 +62,8 @@ class SchedulerMain:
                 else:
                     son = father
 
+                # print("before crossover: ", father.print_chromosome, mother.print_chromosome)
+
                 # Mutation
                 if random.random() < input_data.mutation_rate:
                     son = self.custom_mutation(son)
@@ -94,6 +96,7 @@ class SchedulerMain:
             self.print_generation(self.newlist)
             nogenerations += 1
 
+
     def select_parent_roulette(self):
         self.firstlistfitness /= 10
         randomdouble = random.random() * self.firstlistfitness
@@ -113,10 +116,12 @@ class SchedulerMain:
         i = 0
         while newfitness < oldfitness:
             c.gene[geneno] = Gene(geneno)
+            # print(c.gene[0].room_assignment)
             newfitness = c.get_fitness()
             i += 1
             if i >= 500000:
                 break
+        return c
 
     def crossover(self, father, mother):
         randomint = random.randint(0, input_data.nostudentgroup - 1)
@@ -156,7 +161,9 @@ class SchedulerMain:
         randomint = random.randint(0, 99)
         return copy.deepcopy(gen_list[randomint])
 
+# ------ not in use ------
     def mutation(self, c):
+        # shifting the slotno array of a gene to the left in a bid to rearrange
         geneno = random.randint(0, input_data.nostudentgroup - 1)
         temp = c.gene[geneno].slotno[0]
         for i in range(input_data.daysperweek * input_data.hoursperday - 1):
@@ -164,6 +171,7 @@ class SchedulerMain:
         c.gene[geneno].slotno[input_data.daysperweek * input_data.hoursperday - 1] = temp
 
     def swap_mutation(self, c):
+        # swapping two slotno elements in a bid to rearrange a gene.slotno
         geneno = random.randint(0, input_data.nostudentgroup - 1)
         slotno1 = random.randint(0, input_data.hoursperday * input_data.daysperweek - 1)
         slotno2 = random.randint(0, input_data.hoursperday * input_data.daysperweek - 1)

@@ -5,7 +5,7 @@ from entitities.room import Room
 from entitities.student_group import StudentGroup
 from entitities.Class import Class
 import json
-
+from enums import Size, RoomType
 from entitities.time_slot import TimeSlot
 
 
@@ -17,21 +17,19 @@ class inputData():
         self.faculties = []
         self.constraints = []
         self.classes = []
-        self.cross_over_rate = 1.0
-        self.mutation_rate = 0.1
         self.nostudentgroup = len(self.student_groups)
-        self.hours = 3
+        self.hours = 8
         self.days = 5
 
-    def addCourse(self, name: str, code: str, credits: int, student_groupsID: List[str], facultyId):
-        self.courses.append(Course(name, code, credits, student_groupsID, facultyId))
+    def addCourse(self, name: str, code: str, credits: int, student_groupsID: List[str], facultyId, required_room_type: str ):
+        self.courses.append(Course(name, code, credits, student_groupsID, facultyId, required_room_type))
         # print(Course(name, code, credits, student_groupsID).name)
 
     def addRoom(self, Id: str, name:str, capacity:int, room_type:str):
         self.rooms.append(Room(Id, name, capacity, room_type))
 
-    def addStudentGroup(self, id: str, name:str, courseIDs: str, teacherIDS: str, hours_required:List[int]):
-        self.student_groups.append(StudentGroup(id, name, courseIDs, teacherIDS, hours_required))
+    def addStudentGroup(self, id: str, name:str, no_students: int, courseIDs: str, teacherIDS: str, hours_required:List[int]):
+        self.student_groups.append(StudentGroup(id, name, no_students, courseIDs, teacherIDS, hours_required))
 
     def addFaculty(self, id:str, name:str, department:str, courseID: str):
         self.faculties.append(Faculty(id, name, department, courseID))
@@ -65,9 +63,10 @@ class inputData():
     
     def create_time_slots(self, no_hours_per_day, no_days_per_week, day_start_time):
         time_slots = []
-        for day in range(1, no_days_per_week+1):
-            for hour in range(no_hours_per_day+1):
+        for day in range(no_days_per_week):
+            for hour in range(no_hours_per_day):
                 time_slots.append(TimeSlot(id=len(time_slots), day=day, start_time=hour, available=True))
+        # print(time_slots, len(time_slots))
         return time_slots
     
     
@@ -104,7 +103,7 @@ input_data = inputData()
 with open('course-data.json') as file:
     course_data = json.load(file)
     for course in course_data:
-        input_data.addCourse(course['name'], course['code'], course['credits'], course['student_groupsID'], course['facultyId'])
+        input_data.addCourse(course['name'], course['code'], course['credits'], course['student_groupsID'], course['facultyId'], course['required_room_type'])
 
 # Read room data from JSON file
 with open('rooms-data.json') as file:
@@ -116,7 +115,7 @@ with open('rooms-data.json') as file:
 with open('studentgroup-data.json') as file:
     student_group_data = json.load(file)
     for student_group in student_group_data:
-        input_data.addStudentGroup(student_group['id'], student_group['name'], student_group['courseIDs'], student_group['teacherIDS'], student_group['hours_required'])
+        input_data.addStudentGroup(student_group['id'], student_group['name'], student_group['no_students'], student_group['courseIDs'], student_group['teacherIDS'], student_group['hours_required'])
 
 # Read faculty data from JSON file
 with open('faculty-data.json') as file:
