@@ -20,25 +20,29 @@ class Timetable:
         self.subject_no = 0
         self.cnt = 0
 
-        self.slot = [(None)]*self.days*self.hours*self.no_student_groups
+        # array of all periods possible
+        self.periods_list = [(None)]*self.days*self.hours*self.no_student_groups
 
+        # populating a slot with a CLASS for each course of each student group 
         for student_group in input_data.student_groups:
             periods = 0
             for i in range(student_group.no_courses):
-                self.hourcount = 1
+                self.hourcount = 1 
                 while self.hourcount <= student_group.hours_required[i]:
-                    self.slot[self.cnt] = Class(student_group, student_group.teacherIDS[i], student_group.courseIDs[i])
+                    self.periods_list[self.cnt] = Class(student_group, student_group.teacherIDS[i], student_group.courseIDs[i])
                     self.hourcount += 1
                     self.cnt += 1
                     periods += 1
 
+            # if the number of periods occupied with classes is still less than the total number of periods available for a student group
             while periods < self.days*self.hours:
                 periods += 1
-                self.cnt += 1    
+                self.cnt += 1  
+
 
 Timetable = Timetable()
 # print(Timetable)
-# classes = Timetable.slot
+classes = Timetable.periods_list
 # print(classes)
                 
                 
