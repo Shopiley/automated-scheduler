@@ -101,25 +101,25 @@ class inputData():
 input_data = inputData()
 
 # Read course data from JSON file
-with open('course-data.json') as file:
+with open('data/course-data.json') as file:
     course_data = json.load(file)
     for course in course_data:
         input_data.addCourse(course['name'], course['code'], course['credits'], course['student_groupsID'], course['facultyId'])
 
 # Read room data from JSON file
-with open('rooms-data.json') as file:
+with open('data/rooms-data.json') as file:
     room_data = json.load(file)
     for room in room_data:
         input_data.addRoom(room['Id'], room['name'], room['capacity'], room['room_type'])
 
 # Read student group data from JSON file
-with open('studentgroup-data.json') as file:
+with open('data/studentgroup-data.json') as file:
     student_group_data = json.load(file)
     for student_group in student_group_data:
         input_data.addStudentGroup(student_group['id'], student_group['name'], student_group['courseIDs'], student_group['teacherIDS'], student_group['hours_required'])
 
 # Read faculty data from JSON file
-with open('faculty-data.json') as file:
+with open('data/faculty-data.json') as file:
     faculty_data = json.load(file)
     for faculty in faculty_data:
         input_data.addFaculty(faculty['id'], faculty['name'], faculty['department'], faculty['courseID'])

@@ -1,5 +1,5 @@
 from input_data import input_data
-from timetable import Timetable
+from old_GA.timetable import Timetable
 
 
 class Utility:
